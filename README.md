@@ -1,15 +1,17 @@
 # Creator Content Posting Optimization System
 
 ## Team Information
-- **Team Name**: [Team Name]
-- **Year**: [Year]
-- **All-Female Team**: [Yes/No]
+- **Team Name**: D.A.D.
+- **Year**: Second
+- **All-Female Team**: No
 
 ## Architecture Overview
 
-The system uses a deterministic joint optimizer. For every content item, it evaluates all Instagram and YouTube posting hours and selects the platform-time pair with the highest weighted score. The score mirrors the evaluation objective: creator base engagement multiplied by platform activity and creator-specific historical engagement, with secondary weights for timing quality and soft platform-content fit. SHORT content receives a light Instagram preference and LONG content receives a light YouTube preference, but the final choice can still switch platforms when historical creator performance and activity signals are stronger.
+Our system is a deterministic real-time optimizer that jointly chooses the best platform and posting hour. For each content item, it evaluates all 48 possible decisions: Instagram and YouTube across 24 time slots. Every candidate is scored using the evaluation objective: creator base engagement x platform activity x creator-specific historical engagement, with additional weight for timing quality and soft platform-content fit.
 
-All datasets are loaded once into dictionary indexes, so each recommendation checks only 48 candidates and remains fast during burst submissions. Missing creator or history values fall back to global and platform/content/time averages, ensuring every valid content item receives an output. The scheduling decision is explainable: if the best-scoring slot is the submission hour, the system returns POST_NOW; otherwise it schedules the content for the optimal future slot. Ties are resolved by fixed rules, making repeated runs identical.
+SHORT content is biased toward Instagram and LONG content toward YouTube, but this is not a hard rule. If a creator's history or a platform's peak activity shows a better opportunity elsewhere, the optimizer can switch. This handles conflicting platform and timing signals while staying explainable.
+
+All CSV data is loaded once into dictionary indexes, so recommendations are fast enough for burst submissions. Missing history or creator values fall back to global and platform/content/time averages. The decision is simple: if the best slot is the submission hour, return POST_NOW; otherwise return SCHEDULE. Fixed tie-breaking makes outputs reproducible. The backend also supports submit, retrieve, batch, analytics, and explanation APIs.
 
 ---
 

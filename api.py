@@ -4,6 +4,7 @@ from urllib.parse import parse_qs, urlparse
 
 from optimizer.analytics import build_analytics
 from optimizer.data import Dataset
+import optimizer.dashboard as dashboard_module
 from optimizer.dashboard import render_dashboard
 from optimizer.engine import RecommendationEngine
 from optimizer.models import ContentItem
@@ -50,63 +51,69 @@ def _submit_content_page() -> str:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Submit Content</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       min-height: 100vh;
       display: grid;
       place-items: center;
-      font-family: Inter, system-ui, sans-serif;
-      color: #f4f7f4;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(255,255,255,0.03) 1px, transparent 1px),
-        radial-gradient(circle at 20% 10%, rgba(72,214,194,0.18), transparent 34%),
-        #071012;
-      background-size: 52px 52px, 52px 52px, auto, auto;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #eef1f6;
+      background: #0a0e1a;
       padding: 24px;
     }
     main {
       width: min(760px, 100%);
-      border: 1px solid rgba(220,236,229,0.16);
-      border-radius: 8px;
-      background: rgba(13,28,29,0.86);
-      box-shadow: 0 28px 90px rgba(0,0,0,0.42);
+      border: 1px solid rgba(148,163,196,0.14);
+      border-radius: 12px;
+      background: rgba(16,21,38,0.92);
+      box-shadow: 0 28px 90px rgba(0,0,0,0.5);
       overflow: hidden;
     }
-    header { padding: 22px 24px; border-bottom: 1px solid rgba(220,236,229,0.16); }
+    header { padding: 22px 24px; border-bottom: 1px solid rgba(148,163,196,0.14); }
     h1 { margin: 0 0 7px; font-size: 28px; }
-    p { margin: 0; color: #b9c6c1; line-height: 1.5; }
+    p { margin: 0; color: #9ba4b8; line-height: 1.5; }
     form { padding: 24px; display: grid; gap: 14px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    label { display: grid; gap: 6px; color: #b9c6c1; font-size: 13px; }
+    label { display: grid; gap: 6px; color: #9ba4b8; font-size: 13px; }
     input, select, button {
       height: 42px;
       border-radius: 8px;
-      border: 1px solid rgba(220,236,229,0.18);
-      background: rgba(255,255,255,0.06);
-      color: #f4f7f4;
+      border: 1px solid rgba(148,163,196,0.18);
+      background: rgba(255,255,255,0.05);
+      color: #eef1f6;
       padding: 0 12px;
       font: inherit;
     }
+    select, select option {
+      background: #141a30;
+      color: #eef1f6;
+    }
     button {
-      background: #48d6c2;
-      color: #031110;
+      background: linear-gradient(135deg, #6c9cff, #8b6cf5);
+      color: #fff;
       border-color: transparent;
       font-weight: 800;
       cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(108,156,255,0.25);
     }
     pre {
       margin: 0 24px 24px;
       min-height: 110px;
       white-space: pre-wrap;
-      border-radius: 8px;
-      background: #050b0c;
-      color: #bde66d;
+      border-radius: 10px;
+      background: #080c18;
+      color: #a8e06c;
       padding: 16px;
       overflow: auto;
+      border: 1px solid rgba(148,163,196,0.1);
     }
-    a { color: #48d6c2; }
+    a { color: #6c9cff; }
     @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -164,7 +171,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/":
-            self._html(render_dashboard())
+            self._html(render_dashboard(), extra_headers={"X-Dashboard-Source": dashboard_module.__file__})
             return
         if parsed.path == "/submit_content":
             self._html(_submit_content_page())
@@ -228,11 +235,16 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _html(self, html: str, status: int = 200) -> None:
+    def _html(
+        self, html: str, status: int = 200, extra_headers: dict[str, str] | None = None
+    ) -> None:
         body = html.encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        if extra_headers:
+            for key, value in extra_headers.items():
+                self.send_header(key, value)
         self.end_headers()
         self.wfile.write(body)
 

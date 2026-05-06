@@ -1,45 +1,18 @@
-# Creator Content Posting Optimization System
+# Architecture
 
-## Goal
+Our system is a deterministic, real-time optimizer for creator content posting. It loads the provided content stream, creator base engagement, platform activity, and historical engagement data into indexed dictionaries for fast lookup. For every content item, the engine evaluates all 48 possible platform-time choices: Instagram and YouTube across 24 hours.
 
-The system recommends the best platform, posting hour, and posting decision for each submitted content item. It is tuned to the evaluation formula in the problem statement while keeping the logic deterministic and easy to explain.
-
-## Core Strategy
-
-For every content item, the engine evaluates all 48 possible choices:
+Each candidate is scored using the evaluation-aligned formula:
 
 ```text
-2 platforms x 24 time slots
+expected_engagement = creator_base * platform_activity * historical_engagement
+score = 0.50 * normalized(expected_engagement)
+      + 0.20 * platform_activity
+      + 0.15 * platform_quality
 ```
 
-Each candidate receives the same weighted score used by the evaluator:
+Platform quality is a soft signal: SHORT content is biased toward Instagram and LONG content toward YouTube, but creator-specific history and timing can override that preference when the data supports a better result. This creates the required trade-off between platform fit and peak timing.
 
-```text
-0.50 * normalized_expected_engagement
-+ 0.20 * platform_activity
-+ 0.15 * platform_quality
-```
+The selected recommendation is the highest-scoring platform-time pair. If the chosen time equals the submission hour, the decision is `POST_NOW`; otherwise it is `SCHEDULE`. New submissions are stored in memory so `/submit_content` and `/get_recommendation` stay consistent.
 
-Expected engagement is:
-
-```text
-creator_base_engagement * activity_score * historical_avg_engagement
-```
-
-The highest scoring candidate wins. Ties are resolved deterministically by expected engagement, activity score, platform quality, earlier time slot, then Instagram.
-
-## Scheduling
-
-The engine compares the best future slot with the score available at the submission hour. If the immediate option is close enough, it returns `POST_NOW`; otherwise it returns `SCHEDULE`. High sensitivity content uses a wider immediate-post margin, while low sensitivity content is scheduled whenever a better slot exists.
-
-## Robustness
-
-CSV files are validated while loading. Invalid rows are skipped. If a creator or historical row is missing, the engine falls back to global and platform/content/time averages so every valid content item still receives a recommendation.
-
-## Performance
-
-All CSV data is preloaded into dictionaries. Ranked candidates are cached per `(creator_id, content_type)`, so repeated requests for the same creator profile are served from memory. Recommendation generation is constant time per item because only 48 candidates are evaluated before caching. This supports burst submissions and keeps API latency low.
-
-## Demo Surface
-
-The standard-library API serves a dashboard at `/`, score analytics at `/analytics`, single explanations at `/explain`, and batch recommendations at `/batch_recommendations`. These routes are separate from the evaluator-ready `submission.csv`, so presentation features cannot break the required output format.
+The backend exposes required APIs, batch recommendations, analytics, explanations, and a presentation dashboard. No external APIs or ML inference are used, keeping the system reproducible, explainable, and efficient for burst submissions.

@@ -4,687 +4,616 @@ def render_dashboard() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Creator Posting Optimizer</title>
+  <title>PostPulse Optimizer</title>
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #071012;
-      --ink: #f4f7f4;
-      --soft: #b9c6c1;
-      --muted: #7f918a;
-      --line: rgba(220, 236, 229, 0.16);
-      --panel: rgba(13, 28, 29, 0.78);
-      --panel-strong: rgba(17, 39, 40, 0.92);
-      --cyan: #48d6c2;
-      --lime: #bde66d;
-      --coral: #ff8a6b;
-      --blue: #78a6ff;
+      --bg: #081018;
+      --panel: rgba(12, 21, 34, 0.78);
+      --panel2: rgba(255, 255, 255, 0.07);
+      --line: rgba(255, 255, 255, 0.14);
+      --text: #f7fbff;
+      --muted: #a9b7c8;
+      --blue: #58a6ff;
+      --green: #33d69f;
       --yellow: #ffd166;
-      --shadow: rgba(0, 0, 0, 0.34);
+      --pink: #ff6b9a;
+      --purple: #a78bfa;
+      --shadow: 0 22px 70px rgba(0, 0, 0, 0.30);
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--ink);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
       background:
-        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(255,255,255,0.025) 1px, transparent 1px),
-        radial-gradient(circle at 20% 10%, rgba(72, 214, 194, 0.18), transparent 34%),
-        #071012;
-      background-size: 54px 54px, 54px 54px, auto, auto;
+        radial-gradient(circle at 15% 0%, rgba(88, 166, 255, 0.28), transparent 30%),
+        radial-gradient(circle at 88% 8%, rgba(51, 214, 159, 0.20), transparent 34%),
+        radial-gradient(circle at 58% 88%, rgba(167, 139, 250, 0.12), transparent 30%),
+        linear-gradient(135deg, #081018 0%, #0b1728 48%, #071019 100%);
       overflow-x: hidden;
     }
-    canvas#network {
+    body::before {
+      content: "";
       position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
       pointer-events: none;
-      opacity: 0.82;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
     }
     .shell {
       position: relative;
       z-index: 1;
-      min-height: 100vh;
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 22px;
     }
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 14px 28px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(7, 16, 18, 0.78);
-      backdrop-filter: blur(18px);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-    .mark {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(72, 214, 194, 0.45);
-      background: conic-gradient(from 110deg, rgba(72,214,194,0.82), rgba(189,230,109,0.88), rgba(255,138,107,0.78), rgba(72,214,194,0.82));
-      color: #051012;
-      font-weight: 900;
-      border-radius: 8px;
-      box-shadow: 0 12px 30px rgba(72, 214, 194, 0.16);
-    }
-    .brand strong { display: block; font-size: 15px; }
-    .brand span { display: block; color: var(--soft); font-size: 12px; margin-top: 2px; }
     .nav {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 0 24px;
     }
-    .nav a, button {
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #071018;
+      font-weight: 950;
+      background: linear-gradient(135deg, var(--green), var(--blue));
+      box-shadow: 0 12px 30px rgba(88, 166, 255, 0.28);
+    }
+    .brand strong { display: block; font-size: 16px; }
+    .brand span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .links { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .links a, button {
       border: 1px solid var(--line);
       border-radius: 8px;
-      color: var(--ink);
+      padding: 10px 13px;
       background: rgba(255,255,255,0.06);
+      color: var(--text);
       text-decoration: none;
-      padding: 9px 12px;
       font: inherit;
+      font-weight: 800;
       cursor: pointer;
-      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
     }
-    .nav a:hover, button:hover {
-      transform: translateY(-1px);
-      border-color: rgba(72, 214, 194, 0.55);
-      background: rgba(72, 214, 194, 0.12);
+    .links a:hover, button:hover { transform: translateY(-1px); border-color: rgba(88,166,255,.55); }
+    .primary {
+      color: #061017 !important;
+      background: linear-gradient(135deg, var(--green), var(--blue)) !important;
+      border-color: transparent !important;
     }
     .hero {
-      min-height: calc(100vh - 66px);
       display: grid;
-      grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 1.05fr);
-      align-items: center;
-      gap: 34px;
-      padding: 52px 46px 30px;
+      grid-template-columns: 0.88fr 1.12fr;
+      gap: 22px;
+      align-items: stretch;
     }
-    .eyebrow {
-      color: var(--lime);
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    h1 {
-      max-width: 840px;
-      margin: 12px 0 18px;
-      font-size: clamp(44px, 7vw, 92px);
-      line-height: 0.92;
-      letter-spacing: 0;
-    }
-    .hero p {
-      max-width: 650px;
-      color: var(--soft);
-      font-size: 18px;
-      line-height: 1.6;
-    }
-    .cta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 26px;
-    }
-    .primary {
-      background: var(--cyan);
-      color: #031110;
-      border-color: transparent;
-      font-weight: 800;
-    }
-    .score-strip {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(120px, 1fr));
-      gap: 12px;
-      margin-top: 34px;
-      max-width: 730px;
-    }
-    .metric {
-      min-height: 112px;
-      padding: 15px;
+    .card {
       border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(11, 25, 26, 0.74);
-      box-shadow: 0 18px 60px var(--shadow);
-    }
-    .metric span { color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.07em; }
-    .metric strong { display: block; margin-top: 13px; font-size: 30px; line-height: 1; }
-    .metric small { display: block; margin-top: 9px; color: var(--soft); }
-    .command-center {
-      position: relative;
-      min-height: 540px;
-      border: 1px solid rgba(72, 214, 194, 0.22);
-      border-radius: 8px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.07), transparent 32%),
-        rgba(9, 22, 23, 0.74);
-      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
-      overflow: hidden;
-    }
-    .dial {
-      position: absolute;
-      inset: 36px;
-      border: 1px solid rgba(255,255,255,0.11);
-      border-radius: 50%;
-      animation: spin 36s linear infinite;
-    }
-    .dial::before, .dial::after {
-      content: "";
-      position: absolute;
-      inset: 16%;
-      border: 1px dashed rgba(189,230,109,0.24);
-      border-radius: 50%;
-    }
-    .dial::after {
-      inset: 32%;
-      border-style: solid;
-      border-color: rgba(120,166,255,0.28);
-    }
-    .needle {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 42%;
-      height: 2px;
-      transform-origin: left center;
-      background: linear-gradient(90deg, var(--cyan), transparent);
-      animation: sweep 7s ease-in-out infinite alternate;
-    }
-    .node {
-      position: absolute;
-      width: 112px;
-      padding: 12px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(4, 15, 16, 0.82);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.25);
-      animation: float 5s ease-in-out infinite;
-    }
-    .node b { display: block; font-size: 13px; }
-    .node span { display: block; margin-top: 5px; color: var(--soft); font-size: 12px; }
-    .n1 { left: 9%; top: 12%; border-color: rgba(72,214,194,0.4); }
-    .n2 { right: 11%; top: 18%; border-color: rgba(255,138,107,0.42); animation-delay: -1s; }
-    .n3 { left: 14%; bottom: 14%; border-color: rgba(189,230,109,0.45); animation-delay: -2s; }
-    .n4 { right: 9%; bottom: 17%; border-color: rgba(120,166,255,0.42); animation-delay: -3s; }
-    .center-card {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: min(74%, 330px);
-      padding: 22px;
-      border: 1px solid rgba(72,214,194,0.34);
-      border-radius: 8px;
-      background: rgba(7, 18, 19, 0.86);
-      text-align: center;
-    }
-    .center-card strong { display: block; font-size: 42px; }
-    .center-card span { color: var(--soft); }
-    section.content {
-      padding: 26px 46px 58px;
-      display: grid;
-      gap: 18px;
-    }
-    .section-title {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 18px;
-      margin-top: 6px;
-    }
-    .section-title h2 { margin: 0; font-size: 26px; }
-    .section-title p { margin: 7px 0 0; color: var(--soft); max-width: 700px; }
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(420px, 1.35fr) minmax(320px, 0.65fr);
-      gap: 18px;
-    }
-    .panel {
-      border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 16px;
       background: var(--panel);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 18px 60px rgba(0,0,0,0.24);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
       overflow: hidden;
     }
-    .panel-head {
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.035);
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-    }
-    .panel-head h3 { margin: 0; font-size: 17px; }
-    .panel-body { padding: 18px; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th, td {
-      padding: 13px 14px;
-      border-bottom: 1px solid var(--line);
-      text-align: left;
-      white-space: nowrap;
-    }
-    th {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-    tbody tr {
-      transition: background 160ms ease, transform 160ms ease;
-    }
-    tbody tr:hover {
-      background: rgba(72,214,194,0.08);
-    }
-    .pill {
+    .pad { padding: 28px; }
+    .eyebrow {
       display: inline-flex;
       align-items: center;
-      min-height: 26px;
-      padding: 4px 9px;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid rgba(51,214,159,.35);
       border-radius: 999px;
-      background: rgba(72,214,194,0.12);
-      color: var(--cyan);
-      border: 1px solid rgba(72,214,194,0.25);
-      font-weight: 700;
+      color: var(--green);
+      background: rgba(51,214,159,.08);
       font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
     }
-    .pill.youtube { color: var(--coral); background: rgba(255,138,107,0.12); border-color: rgba(255,138,107,0.28); }
-    .bars, .heat {
+    h1 {
+      margin: 16px 0 14px;
+      font-size: clamp(42px, 5vw, 78px);
+      line-height: .92;
+      letter-spacing: 0;
+    }
+    p { color: var(--muted); line-height: 1.65; margin: 0; }
+    .kpis {
       display: grid;
+      grid-template-columns: repeat(2, minmax(160px, 1fr));
       gap: 12px;
+      margin-top: 22px;
     }
-    .bar label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--soft);
-      margin-bottom: 6px;
-    }
-    .track {
-      height: 11px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--cyan), var(--lime));
-      border-radius: inherit;
-      animation: grow 900ms ease both;
-    }
-    .fill.alt { background: linear-gradient(90deg, var(--coral), var(--yellow)); }
-    .heat-grid {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 7px;
-    }
-    .cell {
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 6px;
-      color: #071012;
-      font-size: 11px;
-      font-weight: 900;
-      background: color-mix(in srgb, var(--cyan) var(--v), rgba(255,255,255,0.09));
-    }
-    .lookup-grid {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    input {
-      width: 100%;
-      min-width: 0;
-      height: 42px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.06);
-      color: var(--ink);
-      padding: 0 12px;
-      font: inherit;
-    }
-    .candidate-list {
-      display: grid;
-      gap: 9px;
-    }
-    .candidate {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 10px;
-      align-items: center;
-      padding: 11px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.045);
-    }
-    .rank {
-      width: 28px;
-      height: 28px;
-      display: grid;
-      place-items: center;
-      border-radius: 7px;
-      background: rgba(72,214,194,0.16);
-      color: var(--cyan);
-      font-weight: 900;
-    }
-    .candidate b { display: block; font-size: 14px; }
-    .candidate span { display: block; color: var(--soft); font-size: 12px; margin-top: 3px; }
-    .explain-score { color: var(--lime); font-weight: 900; }
-    .formula {
-      margin-top: 18px;
+    .kpi {
+      min-height: 112px;
       padding: 16px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: var(--panel-strong);
-      color: var(--soft);
-      font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-      font-size: 13px;
-      line-height: 1.7;
+      background: var(--panel2);
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes sweep {
-      from { transform: rotate(18deg); }
-      to { transform: rotate(310deg); }
+    .kpi label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+    .kpi strong { display: block; margin-top: 12px; font-size: 30px; }
+    .kpi small { display: block; color: var(--muted); margin-top: 8px; font-size: 12px; }
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      height: 100%;
     }
-    @keyframes grow {
-      from { width: 0; }
+    .chart-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel2);
+      padding: 16px;
+      min-height: 285px;
     }
+    .chart-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: 950;
+    }
+    canvas { width: 100%; height: 230px; display: block; }
+    section { margin-top: 18px; scroll-margin-top: 16px; }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 14px;
+      margin: 0 0 12px;
+    }
+    .section-head h2 { margin: 0; font-size: 22px; }
+    .section-head p { max-width: 760px; font-size: 14px; }
+    .two { display: grid; grid-template-columns: 1.15fr .85fr; gap: 18px; align-items: start; }
+    .three { display: grid; grid-template-columns: 1fr 1fr 0.85fr; gap: 14px; }
+    .head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .head h3 { margin: 0; font-size: 15px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+    .table-wrap { overflow: auto; }
+    .platform { color: var(--green); font-weight: 950; }
+    .platform.yt { color: var(--pink); }
+    form { display: grid; gap: 12px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    label { display: grid; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 900; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      padding: 11px 12px;
+      font: inherit;
+      outline: none;
+    }
+    input, select { height: 44px; }
+    select option { color: #0f172a; }
+    textarea { min-height: 150px; resize: vertical; line-height: 1.4; }
+    .result {
+      min-height: 195px;
+      margin: 0;
+      padding: 16px;
+      border-radius: 8px;
+      background: #03070b;
+      border: 1px solid rgba(255,255,255,.1);
+      color: #b7ffcf;
+      white-space: pre-wrap;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .tabs { display: flex; gap: 8px; padding: 16px 18px 0; }
+    .tab[aria-selected="true"] { background: rgba(88,166,255,.18); border-color: rgba(88,166,255,.45); }
+    .tabpanels { padding: 16px 18px 18px; }
+    .tabpanel[hidden] { display: none; }
+    .candidate-list { display: grid; gap: 10px; }
+    .candidate {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel2);
+    }
+    .rank {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(88,166,255,.16);
+      color: var(--blue);
+      font-weight: 950;
+    }
+    .candidate b { display: block; font-size: 13px; }
+    .candidate span { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .score { color: var(--green); font-weight: 950; }
+    .bar-row { display: grid; gap: 8px; margin-top: 12px; }
+    .bar-label { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; font-weight: 900; }
+    .track { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow: hidden; }
+    .fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--blue)); width: 0; transition: width .8s ease; }
     @media (max-width: 980px) {
-      .hero, .layout { grid-template-columns: 1fr; }
-      .hero { padding: 38px 22px 24px; }
-      section.content { padding: 22px; }
-      .score-strip { grid-template-columns: repeat(2, 1fr); }
-      .command-center { min-height: 460px; }
+      .hero, .two { grid-template-columns: 1fr; }
+      .kpis, .chart-grid, .three { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 620px) {
-      .topbar { align-items: flex-start; flex-direction: column; padding: 14px 18px; }
-      h1 { font-size: 42px; }
-      .score-strip { grid-template-columns: 1fr; }
-      th, td { padding: 10px 8px; font-size: 12px; }
-      .heat-grid { grid-template-columns: repeat(8, 1fr); }
+    @media (max-width: 680px) {
+      .shell { padding: 16px; }
+      .nav { align-items: flex-start; flex-direction: column; }
+      .kpis, .chart-grid, .three, .form-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 40px; }
     }
   </style>
 </head>
 <body>
-  <canvas id="network"></canvas>
   <div class="shell">
-    <nav class="topbar">
+    <nav class="nav">
       <div class="brand">
-        <div class="mark">PS4</div>
-        <div>
-          <strong>Creator Posting Optimizer</strong>
-          <span>48-way deterministic decision engine</span>
-        </div>
+        <div class="logo">P</div>
+        <div><strong>PostPulse Optimizer</strong><span>Creator-aware platform and timing intelligence</span></div>
       </div>
-      <div class="nav">
-        <a href="#proof">Proof</a>
+      <div class="links">
+        <a href="#analytics">Analytics</a>
+        <a href="#submit">Submit API</a>
         <a href="#explain">Explain</a>
-        <a href="/analytics" target="_blank">API</a>
+        <a class="primary" href="/analytics" target="_blank">Raw JSON</a>
       </div>
     </nav>
 
     <header class="hero">
-      <div>
-        <div class="eyebrow">Hackathon-ready optimization cockpit</div>
-        <h1>Find the exact hour where a creator should post.</h1>
-        <p>Every recommendation is chosen by scoring Instagram and YouTube across all 24 hours using creator history, platform activity, content fit, and deterministic tie-breaking.</p>
-        <div class="cta">
-          <a class="primary" href="#explain">Inspect a recommendation</a>
-          <a href="#proof">Show scoring proof</a>
-        </div>
-        <div class="score-strip" id="metrics"></div>
+      <div class="card pad">
+        <div class="eyebrow">Live evaluator-aligned backend</div>
+        <h1>Predict the best moment to publish.</h1>
+        <p>PostPulse scores Instagram and YouTube across every hour, then chooses the highest-value platform-time pair using creator history, platform activity, and content fit.</p>
+        <div class="kpis" id="metrics"></div>
       </div>
-      <div class="command-center" aria-label="Animated recommendation engine map">
-        <div class="dial"></div>
-        <div class="needle"></div>
-        <div class="node n1"><b>Creator</b><span>base signal</span></div>
-        <div class="node n2"><b>Platform</b><span>audience pulse</span></div>
-        <div class="node n3"><b>History</b><span>personal fit</span></div>
-        <div class="node n4"><b>Schedule</b><span>best hour</span></div>
-        <div class="center-card">
-          <span>Visible score</span>
-          <strong id="heroScore">--</strong>
-          <span>deterministic output</span>
+      <div class="card pad">
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title"><span>Score Breakdown</span><span class="pill" id="finalScore">--</span></div>
+            <canvas id="scoreChart" width="520" height="260"></canvas>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title"><span>Platform Mix</span><span class="pill">Live</span></div>
+            <canvas id="platformChart" width="520" height="260"></canvas>
+          </div>
         </div>
       </div>
     </header>
 
-    <section class="content" id="proof">
-      <div class="section-title">
-        <div>
-          <h2>Optimization Proof</h2>
-          <p>The dashboard is powered by live results from the Python backend. No frontend mock data is used.</p>
-        </div>
+    <section id="analytics">
+      <div class="section-head">
+        <div><h2>Analytics Dashboard</h2><p>Charts are generated from `/analytics`, so the presentation visuals and backend output stay consistent.</p></div>
       </div>
-      <div class="layout">
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Highest Confidence Recommendations</h3>
-            <span class="pill">ranked by score</span>
-          </div>
-          <div style="overflow:auto">
-            <table>
-              <thead><tr><th>Content</th><th>Platform</th><th>Hour</th><th>Decision</th><th>Expected</th><th>Score</th></tr></thead>
-              <tbody id="top"></tbody>
-            </table>
-          </div>
+      <div class="three">
+        <div class="card pad">
+          <h3>Decision Split</h3>
+          <canvas id="decisionChart" width="430" height="250"></canvas>
         </div>
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Decision Mix</h3>
-            <span class="pill">100 items</span>
-          </div>
-          <div class="panel-body">
-            <div class="bars" id="platforms"></div>
-            <div style="height:18px"></div>
-            <div class="bars" id="decisions"></div>
-          </div>
+        <div class="card pad">
+          <h3>Recommended Hours</h3>
+          <canvas id="hourChart" width="520" height="250"></canvas>
         </div>
-      </div>
-      <div class="panel">
-        <div class="panel-head">
-          <h3>Recommended Posting Hours</h3>
-          <span class="pill">hour heat-map</span>
-        </div>
-        <div class="panel-body">
-          <div class="heat-grid" id="heat"></div>
+        <div class="card pad">
+          <h3>Metric Bars</h3>
+          <div id="metricBars"></div>
         </div>
       </div>
     </section>
 
-    <section class="content" id="explain">
-      <div class="section-title">
-        <div>
-          <h2>Explain Any Content Item</h2>
-          <p>Use this during presentation to show that the model ranks alternatives and can justify the selected platform-time pair.</p>
+    <section>
+      <div class="section-head">
+        <div><h2>Top Recommendations</h2><p>Highest-confidence recommendations ranked by optimizer score.</p></div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Content</th><th>Platform</th><th>Hour</th><th>Decision</th><th>Expected</th><th>Score</th></tr></thead>
+            <tbody id="topRows"></tbody>
+          </table>
         </div>
       </div>
-      <div class="layout">
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Top Candidate Stack</h3>
-            <span class="pill">live lookup</span>
+    </section>
+
+    <section id="submit">
+      <div class="section-head">
+        <div><h2>Submit Content API</h2><p>Use the buttons here instead of manual testing. Submitted content is stored in backend memory, so `/get_recommendation` can retrieve it by id afterward.</p></div>
+      </div>
+      <div class="two">
+        <div class="card">
+          <div class="head"><h3>Request Builder</h3><span class="pill">POST APIs</span></div>
+          <div class="tabs">
+            <button class="tab" id="tab-single" aria-selected="true" onclick="selectTab('single')">Single Submit</button>
+            <button class="tab" id="tab-batch" aria-selected="false" onclick="selectTab('batch')">Batch Submit</button>
           </div>
-          <div class="panel-body">
-            <div class="lookup-grid">
-              <input id="cid" type="number" min="1" value="1" aria-label="content id">
-              <button onclick="lookup()">Analyze</button>
+          <div class="tabpanels">
+            <div class="tabpanel" id="panel-single">
+              <form id="submitForm">
+                <div class="form-grid">
+                  <label>Content ID <input name="content_id" type="number" value="1040"></label>
+                  <label>Creator ID <input name="creator_id" type="number" value="24"></label>
+                  <label>Content Type <select name="content_type"><option>SHORT</option><option selected>LONG</option></select></label>
+                  <label>Created Timestamp <input name="created_timestamp" min="0" max="23" type="number" value="22"></label>
+                  <label>Time Sensitivity <select name="time_sensitivity"><option>High</option><option selected>Medium</option><option>Low</option></select></label>
+                </div>
+                <button class="primary" type="submit">Submit Content</button>
+              </form>
             </div>
-            <div class="candidate-list" id="lookupResult"></div>
+            <div class="tabpanel" id="panel-batch" hidden>
+              <textarea id="batchPayload" spellcheck="false">{
+  "items": [
+    {"content_id": 2001, "creator_id": 24, "content_type": "SHORT", "created_timestamp": 18, "time_sensitivity": "High"},
+    {"content_id": 2002, "creator_id": 43, "content_type": "LONG", "created_timestamp": 22, "time_sensitivity": "Medium"}
+  ]
+}</textarea>
+              <div style="height:12px"></div>
+              <button class="primary" onclick="submitBatch()">Submit Batch</button>
+            </div>
           </div>
         </div>
-        <div class="panel">
-          <div class="panel-head">
-            <h3>Scoring Formula</h3>
-            <span class="pill">evaluator-aligned</span>
+        <div class="card">
+          <div class="head"><h3>API Response</h3><span class="pill">Live JSON</span></div>
+          <div class="pad"><pre class="result" id="submitResult">Click Submit Content to call POST /submit_content.</pre></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="explain">
+      <div class="section-head">
+        <div><h2>Explain a Recommendation</h2><p>Shows the top five platform-time candidates and the activity/history values that drove the decision.</p></div>
+      </div>
+      <div class="two">
+        <div class="card pad">
+          <div class="form-grid" style="grid-template-columns:1fr auto">
+            <label>Content ID <input id="cid" type="number" value="1"></label>
+            <button class="primary" style="align-self:end" onclick="lookup()">Analyze</button>
           </div>
-          <div class="panel-body">
-            <div class="formula">
-              expected = creator_base * activity * history<br>
-              score = 0.50 * normalized(expected)<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.20 * activity<br>
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ 0.15 * platform_quality
-            </div>
-            <div class="formula">
-              Output stays evaluator-safe:<br>
-              content_id, platform, time_slot, decision
-            </div>
-          </div>
+          <div style="height:14px"></div>
+          <div class="candidate-list" id="lookupResult"></div>
+        </div>
+        <div class="card pad">
+          <h3>Scoring Formula</h3>
+          <pre class="result">expected = creator_base * activity_score * historical_engagement
+
+score = 0.50 * normalized(expected)
+      + 0.20 * activity_score
+      + 0.15 * platform_quality</pre>
         </div>
       </div>
     </section>
   </div>
 
   <script>
-    const pct = value => `${(value * 100).toFixed(2)}%`;
     const byId = id => document.getElementById(id);
+    const pct = value => `${(value * 100).toFixed(2)}%`;
+    const colors = ["#33d69f", "#58a6ff", "#ffd166", "#ff6b9a", "#a78bfa"];
 
-    function metric(label, value, hint) {
-      return `<div class="metric"><span>${label}</span><strong>${value}</strong><small>${hint}</small></div>`;
+    async function safeJson(response) {
+      try { return await response.json(); } catch { return {error: "Invalid response"}; }
     }
-    function platformPill(platform) {
-      return `<span class="pill ${platform === "YouTube" ? "youtube" : ""}">${platform}</span>`;
+
+    function kpi(label, value, note) {
+      return `<div class="kpi"><label>${label}</label><strong>${value}</strong><small>${note}</small></div>`;
     }
-    function bars(title, data, total, alt=false) {
-      const rows = Object.entries(data).map(([key, value]) => `
-        <div class="bar">
-          <label><span>${key}</span><span>${value}</span></label>
-          <div class="track"><div class="fill ${alt ? "alt" : ""}" style="width:${(value / total) * 100}%"></div></div>
+
+    function drawBars(canvas, labels, values, maxValue, colorList = colors) {
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      if (values.length <= 4) {
+        const left = 94, right = 26, top = 28, rowH = 48;
+        values.forEach((v, i) => {
+          const y = top + i * rowH;
+          const maxW = w - left - right;
+          const bw = Math.max(4, (maxW * v) / maxValue);
+          ctx.fillStyle = "#a9b7c8";
+          ctx.font = "800 14px system-ui";
+          ctx.textAlign = "left";
+          ctx.fillText(labels[i], 14, y + 20);
+          ctx.fillStyle = "rgba(255,255,255,.08)";
+          roundRect(ctx, left, y, maxW, 20, 10); ctx.fill();
+          const grad = ctx.createLinearGradient(left, y, left + bw, y);
+          grad.addColorStop(0, colorList[i % colorList.length]);
+          grad.addColorStop(1, "rgba(255,255,255,.36)");
+          ctx.fillStyle = grad;
+          roundRect(ctx, left, y, bw, 20, 10); ctx.fill();
+          ctx.fillStyle = "#f7fbff";
+          ctx.font = "900 13px system-ui";
+          ctx.textAlign = "right";
+          ctx.fillText(`${Math.round(v * 100)}%`, w - 10, y + 16);
+        });
+        return;
+      }
+      const left = 34, bottom = h - 34, top = 20;
+      const gap = 4;
+      const barW = (w - left - 18 - gap * (values.length - 1)) / values.length;
+      ctx.strokeStyle = "rgba(255,255,255,.12)";
+      ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left, bottom); ctx.lineTo(w - 8, bottom); ctx.stroke();
+      values.forEach((v, i) => {
+        const bh = ((bottom - top) * v) / maxValue;
+        const x = left + i * (barW + gap);
+        const y = bottom - bh;
+        const grad = ctx.createLinearGradient(0, y, 0, bottom);
+        grad.addColorStop(0, colorList[i % colorList.length]);
+        grad.addColorStop(1, "rgba(255,255,255,.08)");
+        ctx.fillStyle = grad;
+        roundRect(ctx, x, y, barW, bh, 7); ctx.fill();
+        if (i % 3 === 0) {
+          ctx.fillStyle = "#a9b7c8"; ctx.font = "11px system-ui"; ctx.textAlign = "center";
+          ctx.fillText(labels[i], x + barW / 2, h - 10);
+        }
+      });
+    }
+
+    function drawDonut(canvas, data) {
+      const ctx = canvas.getContext("2d");
+      const entries = Object.entries(data);
+      const total = entries.reduce((sum, [,v]) => sum + v, 0) || 1;
+      const cx = canvas.width / 2, cy = canvas.height / 2 - 10, radius = Math.min(86, canvas.height * 0.32);
+      let start = -Math.PI / 2;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      entries.forEach(([label, value], i) => {
+        const angle = (value / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, start, start + angle);
+        ctx.lineWidth = 30;
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.stroke();
+        start += angle;
+      });
+      ctx.fillStyle = "#f7fbff"; ctx.font = "950 30px system-ui"; ctx.textAlign = "center";
+      ctx.fillText(String(total), cx, cy + 8);
+      ctx.font = "12px system-ui"; ctx.fillStyle = "#a9b7c8";
+      ctx.fillText("items", cx, cy + 28);
+      entries.forEach(([label, value], i) => {
+        const y = canvas.height - 52 + i * 22;
+        ctx.fillStyle = colors[i % colors.length]; roundRect(ctx, 18, y - 10, 12, 12, 3); ctx.fill();
+        ctx.fillStyle = "#a9b7c8"; ctx.textAlign = "left"; ctx.font = "12px system-ui";
+        ctx.fillText(`${label}: ${value}`, 38, y);
+      });
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + rr, y);
+      ctx.arcTo(x + w, y, x + w, y + h, rr);
+      ctx.arcTo(x + w, y + h, x, y + h, rr);
+      ctx.arcTo(x, y + h, x, y, rr);
+      ctx.arcTo(x, y, x + w, y, rr);
+      ctx.closePath();
+    }
+
+    function metricBars(score) {
+      const rows = [
+        ["Engagement", score.engagement_score],
+        ["Timing", score.timing_score],
+        ["Platform", score.platform_score],
+        ["Efficiency", score.efficiency_score]
+      ];
+      return rows.map(([label, value]) => `
+        <div class="bar-row">
+          <div class="bar-label"><span>${label}</span><span>${pct(value)}</span></div>
+          <div class="track"><div class="fill" style="width:${value * 100}%"></div></div>
         </div>
       `).join("");
-      return `<h4 style="margin:0 0 10px">${title}</h4>${rows}`;
     }
-    function heat(data) {
-      const max = Math.max(...Object.values(data), 1);
-      return Array.from({length: 24}, (_, hour) => {
-        const value = data[String(hour)] || 0;
-        const intensity = 18 + Math.round((value / max) * 74);
-        return `<div class="cell" style="--v:${intensity}%">${hour}</div>`;
-      }).join("");
-    }
+
     async function load() {
-      const data = await fetch("/analytics").then(r => r.json());
-      byId("heroScore").textContent = pct(data.score.final_score);
+      const data = await fetch("/analytics").then(safeJson);
+      if (data.error) return;
+      byId("finalScore").textContent = pct(data.score.final_score);
       byId("metrics").innerHTML = [
-        metric("Final Score", pct(data.score.final_score), "visible evaluator"),
-        metric("Timing", pct(data.score.timing_score), "peak slots captured"),
-        metric("Platform Fit", pct(data.score.platform_score), "soft content bias"),
-        metric("Avg Expected", data.average_expected_engagement.toFixed(4), "creator adapted")
+        kpi("Final Score", pct(data.score.final_score), "weighted evaluator score"),
+        kpi("Timing", pct(data.score.timing_score), "chosen slots hit peak activity"),
+        kpi("Platform", pct(data.score.platform_score), "SHORT/LONG fit quality"),
+        kpi("Avg Expected", data.average_expected_engagement.toFixed(4), "base x activity x history")
       ].join("");
-      byId("top").innerHTML = data.top_recommendations.map(row => `
-        <tr>
-          <td>#${row.content_id}</td>
-          <td>${platformPill(row.platform)}</td>
-          <td>${row.time_slot}:00</td>
-          <td>${row.decision}</td>
-          <td>${row.expected_engagement.toFixed(4)}</td>
-          <td>${row.score.toFixed(4)}</td>
-        </tr>
+      byId("metricBars").innerHTML = metricBars(data.score);
+      byId("topRows").innerHTML = data.top_recommendations.map(row => `
+        <tr><td>#${row.content_id}</td><td><span class="platform ${row.platform === "YouTube" ? "yt" : ""}">${row.platform}</span></td><td>${row.time_slot}:00</td><td>${row.decision}</td><td>${row.expected_engagement.toFixed(4)}</td><td>${row.score.toFixed(4)}</td></tr>
       `).join("");
-      byId("platforms").innerHTML = bars("Platform split", data.platform_distribution, data.count);
-      byId("decisions").innerHTML = bars("Scheduling split", data.decision_distribution, data.count, true);
-      byId("heat").innerHTML = heat(data.time_slot_distribution);
+      drawBars(byId("scoreChart"), ["Eng", "Time", "Plat", "Eff"], [data.score.engagement_score, data.score.timing_score, data.score.platform_score, data.score.efficiency_score], 1);
+      drawDonut(byId("platformChart"), data.platform_distribution);
+      drawDonut(byId("decisionChart"), data.decision_distribution);
+      const hourLabels = Array.from({length: 24}, (_, i) => String(i));
+      const hourValues = hourLabels.map(h => data.time_slot_distribution[h] || 0);
+      drawBars(byId("hourChart"), hourLabels, hourValues, Math.max(...hourValues, 1), ["#58a6ff"]);
       lookup();
     }
+
+    function selectTab(tab) {
+      const single = tab === "single";
+      byId("tab-single").setAttribute("aria-selected", String(single));
+      byId("tab-batch").setAttribute("aria-selected", String(!single));
+      byId("panel-single").hidden = !single;
+      byId("panel-batch").hidden = single;
+    }
+
+    async function postJson(path, body) {
+      const response = await fetch(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+      return safeJson(response);
+    }
+
+    byId("submitForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const body = Object.fromEntries(new FormData(event.target).entries());
+      body.content_id = Number(body.content_id);
+      body.creator_id = Number(body.creator_id);
+      body.created_timestamp = Number(body.created_timestamp);
+      byId("submitResult").textContent = "Submitting...";
+      const data = await postJson("/submit_content", body);
+      byId("submitResult").textContent = JSON.stringify(data, null, 2);
+      byId("cid").value = body.content_id;
+      await lookup();
+      await load();
+    });
+
+    async function submitBatch() {
+      try {
+        byId("submitResult").textContent = "Submitting batch...";
+        const data = await postJson("/batch_recommendations", JSON.parse(byId("batchPayload").value));
+        byId("submitResult").textContent = JSON.stringify(data, null, 2);
+        await load();
+      } catch {
+        byId("submitResult").textContent = JSON.stringify({error: "Invalid batch JSON"}, null, 2);
+      }
+    }
+
     async function lookup() {
       const cid = byId("cid").value;
-      const data = await fetch(`/explain?content_id=${cid}`).then(r => r.json());
+      const data = await fetch(`/explain?content_id=${cid}`).then(safeJson);
       if (data.error) {
-        byId("lookupResult").innerHTML = `<div class="candidate"><b>${data.error}</b></div>`;
+        byId("lookupResult").innerHTML = `<div class="candidate"><div class="rank">!</div><div><b>${data.error}</b><span>Submit this content id first or choose an existing id.</span></div><div class="score">--</div></div>`;
         return;
       }
       byId("lookupResult").innerHTML = data.top_candidates.map(row => `
         <div class="candidate">
           <div class="rank">${row.rank}</div>
-          <div>
-            <b>${row.platform} at ${row.time_slot}:00 · ${row.decision}</b>
-            <span>expected ${row.expected_engagement.toFixed(4)} · activity ${row.activity_score.toFixed(2)} · history ${row.historical_engagement.toFixed(3)}</span>
-          </div>
-          <div class="explain-score">${row.score.toFixed(4)}</div>
+          <div><b>${row.platform} at ${row.time_slot}:00 - ${row.decision}</b><span>expected ${row.expected_engagement.toFixed(4)} | activity ${row.activity_score.toFixed(2)} | history ${row.historical_engagement.toFixed(3)}</span></div>
+          <div class="score">${row.score.toFixed(4)}</div>
         </div>
       `).join("");
     }
 
-    const canvas = byId("network");
-    const ctx = canvas.getContext("2d");
-    let w = 0, h = 0, tick = 0;
-    const packets = Array.from({length: 42}, (_, i) => ({
-      lane: i % 7,
-      x: Math.random(),
-      speed: 0.0012 + Math.random() * 0.0026,
-      size: 2 + Math.random() * 3,
-      hue: i % 3
-    }));
-    function resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = canvas.width = Math.floor(innerWidth * dpr);
-      h = canvas.height = Math.floor(innerHeight * dpr);
-      canvas.style.width = innerWidth + "px";
-      canvas.style.height = innerHeight + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      w = innerWidth;
-      h = innerHeight;
-    }
-    function draw() {
-      tick += 1;
-      ctx.clearRect(0, 0, w, h);
-      ctx.lineWidth = 1;
-      for (let lane = 0; lane < 7; lane++) {
-        const y = h * (0.18 + lane * 0.105) + Math.sin(tick * 0.012 + lane) * 18;
-        ctx.beginPath();
-        for (let x = -40; x <= w + 40; x += 26) {
-          const wave = Math.sin((x * 0.011) + tick * 0.018 + lane) * 18;
-          if (x === -40) ctx.moveTo(x, y + wave);
-          else ctx.lineTo(x, y + wave);
-        }
-        ctx.strokeStyle = `rgba(120, 166, 255, ${0.055 + lane * 0.005})`;
-        ctx.stroke();
-      }
-      packets.forEach(packet => {
-        packet.x += packet.speed;
-        if (packet.x > 1.08) packet.x = -0.08;
-        const x = packet.x * w;
-        const y = h * (0.18 + packet.lane * 0.105) + Math.sin(tick * 0.012 + packet.lane + x * 0.011) * 18;
-        ctx.beginPath();
-        ctx.rect(x, y, packet.size * 4, packet.size);
-        const color = packet.hue === 0 ? "72,214,194" : packet.hue === 1 ? "189,230,109" : "255,138,107";
-        ctx.fillStyle = `rgba(${color}, 0.62)`;
-        ctx.fill();
-      });
-      requestAnimationFrame(draw);
-    }
-    addEventListener("resize", resize);
-    resize();
-    draw();
     load();
   </script>
 </body>
